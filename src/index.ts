@@ -6,9 +6,10 @@ const tilebelt = require('@mapbox/tilebelt');
 const vt2geojson = require('@mapbox/vt2geojson');
 const vt2geojsonAsync = util.promisify(vt2geojson);
 
-type requestDataType = { [key: string]: string };
+type requestDataList = string[];
 type LngLat = [number, number];
 type Tile = [number, number, number];
+type Response = { [key: string]: any };
 
 class MvtApi {
     mvtUrl: string;
@@ -20,8 +21,8 @@ class MvtApi {
     async request(
         sourceLayer: string,
         lngLat: LngLat,
-        requestDataType: requestDataType,
-    ): Promise<any> {
+        requestDataList: requestDataList,
+    ): Promise<Response> {
         const tile: Tile = tilebelt.pointToTile(
             lngLat[0],
             lngLat[1],
@@ -41,8 +42,8 @@ class MvtApi {
             }
         });
         return featuresByPoint.map((feature) => {
-            const props: requestDataType = {};
-            Object.keys(requestDataType).map((key) => {
+            const props: Response = {};
+            requestDataList.map((key) => {
                 props[key] = feature.properties![key];
             });
             return props;
