@@ -61,3 +61,38 @@ Longitude and Latitude of Point to search.
 #### requestDataList: string[]
 
 Attribute names you want to get.
+
+#### Response
+
+Object, its keys correspond names defined in ``requestDataList``.
+
+```javascript
+// requestDataList = ['name', 'code', 'test']
+
+{
+    name: VALUE,
+    code: VALUE,
+    test: VALUE,
+}
+
+```
+
+Then, a returned value of ``.request()`` is following.
+
+```javascript
+[
+    {
+        name: VALUE,
+        code: VALUE,
+        test: VALUE,
+    },
+    {
+        name: VALUE,
+        code: VALUE,
+        test: VALUE,
+    },
+]
+
+```
+
+In ordinary case, a length of a returned value may be One, unless polygons overlaped.
