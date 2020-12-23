@@ -9,6 +9,8 @@ describe('mvt-api', () => {
                 expect(response.length).toBe(1);
                 expect(response[0]['name']).toBe('滋賀県');
                 expect(response[0]['code']).toBe('25');
+                // a attribute requested but don't exist in properties of a feature
+                expect(response[0]['test']).toBe(undefined);
             })
             .catch((e) => {
                 expect(e).toBe(undefined);

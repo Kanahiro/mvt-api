@@ -1,7 +1,15 @@
 {
-    "name": "ts-project",
+    "name": "mvt-api",
     "version": "1.0.0",
-    "description": "",
+    "description": "Virtual Spatial Search Web-API with MapboxVectorTile",
+    "keywords": [
+        "vector",
+        "tile",
+        "spatial",
+        "search",
+        "WebAPI",
+        "GeoJSON"
+    ],
     "main": "./dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -14,14 +22,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Kanahiro/ts-template.git"
+        "url": "git+https://github.com/Kanahiro/mvt-api.git"
     },
     "author": "Kanahiro Iguchi <kanahiro.iguchi@gmail.com> (https://github.com/Kanahiro)",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/Kanahiro/ts-template/issues"
+        "url": "https://github.com/Kanahiro/mvt-api/issues"
     },
-    "homepage": "https://github.com/Kanahiro/ts-template#readme",
+    "homepage": "https://github.com/Kanahiro/mvt-api#readme",
     "dependencies": {
         "@mapbox/tilebelt": "^1.0.2",
         "@mapbox/vt2geojson": "^1.1.5",
