@@ -15,7 +15,7 @@ npm install mvt-api
 
 ```javascript
 // src/example.ts
-import { MvtApi } from './index';
+import { MvtApi } from 'mvt-api';
 
 // instantiate MvtApi Class, with Tile Url and Zoomlevel.
 const api = new MvtApi('http://kanahiro.github.io/mvt-api/{z}/{x}/{y}.pbf', 10);
