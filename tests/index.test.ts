@@ -1,5 +1,5 @@
 import { MvtApi } from '../src/index';
-const baseUrl = 'http://kanahiro.github.io/mvt-api/sample';
+const baseUrl = 'http://kanahiro.github.io/mvt-api';
 const api = new MvtApi(`${baseUrl}/{z}/{x}/{y}.pbf`, 10);
 
 describe('mvt-api', () => {
