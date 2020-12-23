@@ -1,0 +1,22 @@
+name: test
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v2
+            - name: setup Node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 10.x
+                  registry-url: 'https://registry.npmjs.org'
+            - name: install dependencies and test
+              run: |
+                  npm install
+                  npm test

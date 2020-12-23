@@ -1,10 +1,10 @@
 import * as util from 'util';
 import { FeatureCollection } from 'geojson';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import booleanPointOnLine from '@turf/boolean-point-on-line';
 import { point } from '@turf/helpers';
 const tilebelt = require('@mapbox/tilebelt');
-const vt2geojson = require('@mapbox/vt2geojson');
-const vt2geojsonAsync = util.promisify(vt2geojson);
+const vt2geojsonAsync = util.promisify(require('@mapbox/vt2geojson'));
 
 type requestDataList = string[];
 type LngLat = [number, number];
@@ -22,7 +22,7 @@ class MvtApi {
         sourceLayer: string,
         lngLat: LngLat,
         requestDataList: requestDataList,
-    ): Promise<Response> {
+    ): Promise<Response[]> {
         const tile: Tile = tilebelt.pointToTile(
             lngLat[0],
             lngLat[1],
@@ -34,11 +34,22 @@ class MvtApi {
                 .replace('{y}', String(tile[1]))
                 .replace('{z}', String(tile[2])),
             layer: sourceLayer,
-        });
+        })
+            .then((response: FeatureCollection) => response)
+            .catch((err: Error) => {
+                throw err;
+            });
 
         const featuresByPoint = geojson.features.filter((feature) => {
-            if (feature.geometry.type === 'Point' || 'MultiPolygon') {
-                return booleanPointInPolygon(point(lngLat), feature as any);
+            switch (feature.geometry.type) {
+                case 'Polygon':
+                case 'MultiPolygon':
+                    return booleanPointInPolygon(point(lngLat), feature as any);
+                case 'LineString':
+                case 'MultiLineString':
+                    return booleanPointOnLine(point(lngLat), feature as any);
+                default:
+                    return false;
             }
         });
         return featuresByPoint.map((feature) => {
