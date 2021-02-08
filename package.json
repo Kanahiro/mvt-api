@@ -1,6 +1,6 @@
 {
     "name": "mvt-api",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Virtual Spatial Search Web-API with MapboxVectorTile",
     "keywords": [
         "vector",
