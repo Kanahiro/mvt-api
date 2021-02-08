@@ -13,20 +13,23 @@ type Response = { [key: string]: any };
 
 class MvtApi {
     mvtUrl: string;
-    zoomLevel: number;
-    constructor(mvtUrl: string, zoomLevel: number) {
+    maxzoom: number;
+    minzoom: number;
+    constructor(mvtUrl: string, maxzoom: number, minzoom = 0) {
         this.mvtUrl = mvtUrl;
-        this.zoomLevel = zoomLevel;
+        this.maxzoom = maxzoom;
+        this.minzoom = minzoom;
     }
-    async request(
+    async getFeaturesByPoint(
         sourceLayer: string,
         lngLat: LngLat,
         requestDataList: requestDataList,
+        zoomLevel = null,
     ): Promise<Response[]> {
         const tile: Tile = tilebelt.pointToTile(
             lngLat[0],
             lngLat[1],
-            this.zoomLevel,
+            zoomLevel ? zoomLevel : this.maxzoom,
         );
         const geojson: FeatureCollection = await vt2geojsonAsync({
             uri: this.mvtUrl
@@ -40,25 +43,31 @@ class MvtApi {
                 throw err;
             });
 
-        const featuresByPoint = geojson.features.filter((feature) => {
-            switch (feature.geometry.type) {
-                case 'Polygon':
-                case 'MultiPolygon':
-                    return booleanPointInPolygon(point(lngLat), feature as any);
-                case 'LineString':
-                case 'MultiLineString':
-                    return booleanPointOnLine(point(lngLat), feature as any);
-                default:
-                    return false;
-            }
-        });
-        return featuresByPoint.map((feature) => {
-            const props: Response = {};
-            requestDataList.map((key) => {
-                props[key] = feature.properties![key];
+        return geojson.features
+            .filter((feature) => {
+                switch (feature.geometry.type) {
+                    case 'Polygon':
+                    case 'MultiPolygon':
+                        return booleanPointInPolygon(
+                            point(lngLat),
+                            feature as any,
+                        );
+                    case 'LineString':
+                    case 'MultiLineString':
+                        return booleanPointOnLine(
+                            point(lngLat),
+                            feature as any,
+                        );
+                    default:
+                        return false;
+                }
+            })
+            .map((feature) => {
+                return requestDataList.reduce((prev: Response, cur) => {
+                    prev[cur] = feature.properties![cur];
+                    return prev;
+                }, {});
             });
-            return props;
-        });
     }
 }
 
