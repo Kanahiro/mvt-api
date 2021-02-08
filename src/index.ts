@@ -1,15 +1,13 @@
 import * as util from 'util';
-import { FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import booleanPointOnLine from '@turf/boolean-point-on-line';
 import { point } from '@turf/helpers';
 const tilebelt = require('@mapbox/tilebelt');
 const vt2geojsonAsync = util.promisify(require('@mapbox/vt2geojson'));
 
-type requestDataList = string[];
 type LngLat = [number, number];
 type Tile = [number, number, number];
-type Response = { [key: string]: any };
 
 class MvtApi {
     mvtUrl: string;
@@ -23,9 +21,8 @@ class MvtApi {
     async getFeaturesByPoint(
         sourceLayer: string,
         lngLat: LngLat,
-        requestDataList: requestDataList,
         zoomLevel = null,
-    ): Promise<Response[]> {
+    ): Promise<Feature[]> {
         const tile: Tile = tilebelt.pointToTile(
             lngLat[0],
             lngLat[1],
@@ -43,31 +40,18 @@ class MvtApi {
                 throw err;
             });
 
-        return geojson.features
-            .filter((feature) => {
-                switch (feature.geometry.type) {
-                    case 'Polygon':
-                    case 'MultiPolygon':
-                        return booleanPointInPolygon(
-                            point(lngLat),
-                            feature as any,
-                        );
-                    case 'LineString':
-                    case 'MultiLineString':
-                        return booleanPointOnLine(
-                            point(lngLat),
-                            feature as any,
-                        );
-                    default:
-                        return false;
-                }
-            })
-            .map((feature) => {
-                return requestDataList.reduce((prev: Response, cur) => {
-                    prev[cur] = feature.properties![cur];
-                    return prev;
-                }, {});
-            });
+        return geojson.features.filter((feature) => {
+            switch (feature.geometry.type) {
+                case 'Polygon':
+                case 'MultiPolygon':
+                    return booleanPointInPolygon(point(lngLat), feature as any);
+                case 'LineString':
+                case 'MultiLineString':
+                    return booleanPointOnLine(point(lngLat), feature as any);
+                default:
+                    return false;
+            }
+        });
     }
 }
 
