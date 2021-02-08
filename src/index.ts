@@ -19,7 +19,7 @@ class MvtApi {
         this.minzoom = minzoom;
     }
     async getFeaturesByPoint(
-        sourceLayer: string,
+        sourceLayers: string[],
         lngLat: LngLat,
         zoomLevel = null,
     ): Promise<Feature[]> {
@@ -28,19 +28,26 @@ class MvtApi {
             lngLat[1],
             zoomLevel ? zoomLevel : this.maxzoom,
         );
-        const geojson: FeatureCollection = await vt2geojsonAsync({
-            uri: this.mvtUrl
-                .replace('{x}', String(tile[0]))
-                .replace('{y}', String(tile[1]))
-                .replace('{z}', String(tile[2])),
-            layer: sourceLayer,
-        })
-            .then((response: FeatureCollection) => response)
-            .catch((err: Error) => {
-                throw err;
-            });
 
-        return geojson.features.filter((feature) => {
+        const features: Feature[] = [];
+        await Promise.all(
+            sourceLayers.map(async (sourceLayer) => {
+                const geojson: FeatureCollection = await vt2geojsonAsync({
+                    uri: this.mvtUrl
+                        .replace('{x}', String(tile[0]))
+                        .replace('{y}', String(tile[1]))
+                        .replace('{z}', String(tile[2])),
+                    layer: sourceLayer,
+                })
+                    .then((response: FeatureCollection) =>
+                        features.push(...response.features),
+                    )
+                    .catch((err: Error) => {
+                        throw err;
+                    });
+            }),
+        );
+        return features.filter((feature) => {
             switch (feature.geometry.type) {
                 case 'Polygon':
                 case 'MultiPolygon':
