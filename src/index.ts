@@ -1,32 +1,32 @@
 import * as util from 'util';
-import { FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import booleanPointOnLine from '@turf/boolean-point-on-line';
 import { point } from '@turf/helpers';
 const tilebelt = require('@mapbox/tilebelt');
 const vt2geojsonAsync = util.promisify(require('@mapbox/vt2geojson'));
 
-type requestDataList = string[];
 type LngLat = [number, number];
 type Tile = [number, number, number];
-type Response = { [key: string]: any };
 
 class MvtApi {
     mvtUrl: string;
-    zoomLevel: number;
-    constructor(mvtUrl: string, zoomLevel: number) {
+    maxzoom: number;
+    minzoom: number;
+    constructor(mvtUrl: string, maxzoom: number, minzoom = 0) {
         this.mvtUrl = mvtUrl;
-        this.zoomLevel = zoomLevel;
+        this.maxzoom = maxzoom;
+        this.minzoom = minzoom;
     }
-    async request(
+    async getFeaturesByPoint(
         sourceLayer: string,
         lngLat: LngLat,
-        requestDataList: requestDataList,
-    ): Promise<Response[]> {
+        zoomLevel = null,
+    ): Promise<Feature[]> {
         const tile: Tile = tilebelt.pointToTile(
             lngLat[0],
             lngLat[1],
-            this.zoomLevel,
+            zoomLevel ? zoomLevel : this.maxzoom,
         );
         const geojson: FeatureCollection = await vt2geojsonAsync({
             uri: this.mvtUrl
@@ -40,7 +40,7 @@ class MvtApi {
                 throw err;
             });
 
-        const featuresByPoint = geojson.features.filter((feature) => {
+        return geojson.features.filter((feature) => {
             switch (feature.geometry.type) {
                 case 'Polygon':
                 case 'MultiPolygon':
@@ -51,13 +51,6 @@ class MvtApi {
                 default:
                     return false;
             }
-        });
-        return featuresByPoint.map((feature) => {
-            const props: Response = {};
-            requestDataList.map((key) => {
-                props[key] = feature.properties![key];
-            });
-            return props;
         });
     }
 }
