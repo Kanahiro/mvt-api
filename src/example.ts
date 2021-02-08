@@ -1,13 +1,12 @@
 import { MvtApi } from './index';
 
-const api = new MvtApi('http://kanahiro.github.io/mvt-api/{z}/{x}/{y}.pbf', 10);
+const api = new MvtApi(
+    'https://tile.openstreetmap.jp/data/japan/{z}/{x}/{y}.pbf',
+    14,
+);
 (async () => {
     const response = await api
-        .getFeaturesByPoint(
-            'pref',
-            [136.07707, 35.28036],
-            ['name', 'code', 'test'],
-        )
+        .getFeaturesByPoint(['landcover', 'water'], [141.505495, 43.045269])
         .then((res) => res)
         .catch((err) => err);
     console.log(response);

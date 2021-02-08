@@ -4,7 +4,7 @@ const api = new MvtApi(tileUrl, 10);
 
 describe('getFeaturesByPoint', () => {
     test('found a tile and a feature', () => {
-        api.getFeaturesByPoint('pref', [136.07707, 35.28036])
+        api.getFeaturesByPoint(['pref'], [136.07707, 35.28036])
             .then((response) => {
                 expect(response.length).toBe(1);
                 expect(response[0].properties!['name']).toBe('滋賀県');
@@ -15,7 +15,7 @@ describe('getFeaturesByPoint', () => {
             });
     });
     test('found a tile but no feature', () => {
-        api.getFeaturesByPoint('pref', [135.9021, 35.9397])
+        api.getFeaturesByPoint(['pref'], [135.9021, 35.9397])
             .then((response) => {
                 expect(response.length).toBe(0);
             })
@@ -24,7 +24,7 @@ describe('getFeaturesByPoint', () => {
             });
     });
     test("couldn't find a tile", () => {
-        api.getFeaturesByPoint('pref', [106.07707, 35.28036])
+        api.getFeaturesByPoint(['pref'], [106.07707, 35.28036])
             .then((response) => {
                 expect(response).toBe(undefined);
             })

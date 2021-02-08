@@ -18,81 +18,51 @@ npm install mvt-api
 import { MvtApi } from 'mvt-api';
 
 // instantiate MvtApi Class, with Tile Url and Zoomlevel.
-const api = new MvtApi('http://kanahiro.github.io/mvt-api/{z}/{x}/{y}.pbf', 10);
-
+const api = new MvtApi(
+    'https://tile.openstreetmap.jp/data/japan/{z}/{x}/{y}.pbf',
+    14,
+);
 (async () => {
-    // async request
     const response = await api
-        .request('pref', [136.07707, 35.28036], ['name', 'code', 'test'])
+        .getFeaturesByPoint(['landcover', 'water'], [141.505495, 43.045269])
         .then((res) => res)
         .catch((err) => err);
     console.log(response);
-    /*
-    [
-        {
-            name: '滋賀県',
-            code: '25',
-            test: undefined
-        }
-    ]
-    */
+    /**
+        [
+            { type: 'Feature',
+            geometry: { type: 'Polygon', coordinates: [Array] },
+            properties: { class: 'lake', intermittent: 0 } },
+            { type: 'Feature',
+            geometry: { type: 'Polygon', coordinates: [Array] },
+            properties: { class: 'grass', subclass: 'park' } },
+            { type: 'Feature',
+            geometry: { type: 'Polygon', coordinates: [Array] },
+            properties: { class: 'wood', subclass: 'wood' } }
+        ]
+     */
 })();
 
 ```
 
 ## API documents
 
-### MvtApi(mvtUrl: string, zoomLevel: number)
+### MvtApi(mvtUrl: string, maxzoom: number, minzoom = 0)
 
 constructor.
 
-### .request(sourceLayer, lngLat, requestDataList): Promise<Response[]>
+### .getFeaturesByPoint(sourceLayers, lngLat): Promise<Feature[]>
 
-Fetch to a tile and get attributes of features by inputed coordinates, this is similar to GET request.
+Fetch to a tile and get features in sourceLayers and by inputed coordinates.
 
-#### sourceLayer: string
+#### sourceLayers: string[]
 
-A layer name of MVT you want to get.
+An array of layer names of MVT you want to get.
 
 #### lngLat: [number, number]
 
 Longitude and Latitude of Point to search.
 
-#### requestDataList: string[]
+#### Feature[]
 
-Attribute names you want to get.
-
-#### Response
-
-Object, its keys correspond names defined in ``requestDataList``.
-
-```javascript
-// requestDataList = ['name', 'code', 'test']
-
-{
-    name: VALUE,
-    code: VALUE,
-    test: VALUE,
-}
-
-```
-
-Then, a returned value of ``.request()`` is following.
-
-```javascript
-[
-    {
-        name: VALUE,
-        code: VALUE,
-        test: VALUE,
-    },
-    {
-        name: VALUE,
-        code: VALUE,
-        test: VALUE,
-    },
-]
-
-```
-
-In ordinary case, a length of a returned value may be One, unless polygons overlaped.
+An array of found features.
